@@ -93,13 +93,13 @@ See `clerrit --help` to learn more.
   $ clerrit review 15753 3
   ```
 
-* Review with Markdown output for Gerrit comments:
+* Review with raw Markdown output for Gerrit comments:
 
   ```
   $ clerrit review 15753 --md
   ```
 
-* Review using a different remote instead of `gerrit`:
+* Review using a custom remote instead of the default `review`:
 
   ```
   $ clerrit review 15753 --remote=gerrit
