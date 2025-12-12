@@ -24,7 +24,7 @@ class _Cmd(clerrit.common._Cmd):
     def _prompt(self) -> str:
         contributing_file = self._find_contributing_file()
         contributing_line = f'Read `{contributing_file.name}` for project-specific guidelines.\n\n' if contributing_file else ''
-        md_format = ', formatted as raw Markdown in a code block, ready to be copied as a Gerrit comment' if self._md else ''
+        md_format = ', formatted as raw Markdown in a code block, without any "```markdown", ready to be copied as a Gerrit comment' if self._md else ''
 
         return f'''Review the last commit on the current branch. This is a Gerrit change awaiting review.
 
@@ -41,8 +41,8 @@ Only report genuine issues. Do NOT nitpick or invent problems where none exist.
 Use this output format for your report: one or more blocks as follows, WITHOUT any general summary/conclusion:
 
 1. A heading starting with `📄` followed with the file path and line number.
-2. Your review comments here{md_format}.
-3. The string `✂️ ✂️ ✂️ ✂️ ✂️ ✂️ ✂️ ✂️ ✂️ ✂️ ✂️ ✂️ ✂️ ✂️ ✂️ ✂️ ✂️`.
+2. Your review comment here{md_format}.
+3. Three empty lines.
 
 If the change looks good, just say so briefly.
 '''
