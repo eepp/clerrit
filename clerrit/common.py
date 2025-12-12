@@ -104,13 +104,13 @@ class _Cmd(abc.ABC):
         ]
 
         if not patchsets:
-            raise _AppError(f'No patchsets found for change {self._change_number}')
+            raise _AppError(f'No patchsets found for Gerrit change {self._change_number}')
 
         return max(patchsets)
 
     # Fetches the Gerrit patchset (or latest) from the remote.
     def _fetch_gerrit_change(self):
-        self._info(f'Fetching change [bold]{self._change_number}[/bold] from `[bold]{self._remote}[/bold]`...')
+        self._info(f'Fetching Gerrit change [bold]{self._change_number}[/bold] from `[bold]{self._remote}[/bold]`...')
 
         # Gerrit refs format:
         #
@@ -129,8 +129,9 @@ class _Cmd(abc.ABC):
     # Creates a new branch for the change.
     def _create_clerrit_branch(self):
         branch_name = f'clerrit-{self._change_number}-{self._generate_branch_suffix()}'
+        self._info(f'Creating Git branch `[bold]{branch_name}[/bold]`...')
         self._exec(['git', 'checkout', '-b', branch_name, 'FETCH_HEAD'], check=True)
-        self._info(f'Created branch [bold]{branch_name}[/bold]')
+        self._info(f'Created Git branch `[bold]{branch_name}[/bold]`')
 
     @property
     @abc.abstractmethod
