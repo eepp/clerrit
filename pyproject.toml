@@ -7,7 +7,7 @@ packages = ["clerrit"]
 
 [project]
 name = "clerrit"
-version = "0.1.5"
+version = "0.2.0"
 description = "Supercharge your Gerrit workflow with LLM-powered code reviews and fixes"
 authors = [{ name = "Philippe Proulx", email = "eeppeliteloop@gmail.com" }]
 readme = "README.md"
