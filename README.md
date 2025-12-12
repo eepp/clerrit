@@ -108,7 +108,7 @@ See `clerrit --help` to learn more.
 * Review with extra context for Claude:
 
   ```
-  $ clerrit review 15753 --extra-prompt="Focus on memory safety."
+  $ clerrit review 15753 --extra-prompt='Focus on memory safety.'
   ```
 
 * Fix latest patchset based on review comments:
