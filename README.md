@@ -5,7 +5,7 @@
 Supercharge your [Gerrit Code Review](https://www.gerritcodereview.com/)
 workflow with LLM-powered code reviews and fixes!
 
-__*clerrit*__ is a CLI tool to match Gerrit Code Review and
+__*clerrit*__ is a CLI tool which bridges Gerrit Code Review and
 [Claude Code](https://claude.com/product/claude-code).
 
 The current features are, for a given change and patchset:
