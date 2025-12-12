@@ -22,12 +22,12 @@ def _print_error(msg: str):
 
 
 class _Cmd(abc.ABC):
-    def __init__(self, change_spec: str, remote: str, patchset: int | None,
+    def __init__(self, change_number: int, remote: str, patchset: int | None,
                  claude_print: bool, claude_model: str | None, claude_permission_mode: str | None,
                  extra_prompt: str | None):
         self._console = rich.console.Console(highlighter=None)
         self._info('Initializing...')
-        self._change_number = int(change_spec)
+        self._change_number = change_number
         self._remote = remote
         self._patchset = patchset
         self._claude_print = claude_print
@@ -73,7 +73,7 @@ class _Cmd(abc.ABC):
         path = pathlib.Path.cwd()
 
         while path != path.parent:
-            if (path / '.git').is_dir():
+            if (path / '.git').exists():
                 return path
 
             path = path.parent
@@ -156,4 +156,4 @@ class _Cmd(abc.ABC):
             prompt += '\n\n' + self._extra_prompt
 
         cmd.append(prompt)
-        self._exec(cmd)
+        self._exec(cmd, check=True)

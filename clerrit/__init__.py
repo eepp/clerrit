@@ -13,7 +13,7 @@ import clerrit.review
 _app = typer.Typer()
 
 # Common argument/option types
-_ChangeArg = Annotated[str, typer.Argument(metavar='CHANGE')]
+_ChangeArg = Annotated[int, typer.Argument(metavar='CHANGE')]
 _PatchsetArg = Annotated[int | None, typer.Argument(metavar='PATCHSET')]
 _RemoteOpt = Annotated[str, typer.Option('--remote', '-r',
                                          help='Use the Gerrit remote REMOTE')]
