@@ -1,5 +1,7 @@
 # clerrit
 
+[![PyPI version](https://img.shields.io/pypi/v/clerrit)](https://pypi.org/project/clerrit/)
+
 Supercharge your [Gerrit Code Review](https://www.gerritcodereview.com/)
 workflow with LLM-powered code reviews and fixes!
 
