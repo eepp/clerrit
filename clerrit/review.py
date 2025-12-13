@@ -5,7 +5,7 @@ import clerrit.common
 
 
 class _Cmd(clerrit.common._Cmd):
-    def __init__(self, change: str, remote: str, patchset: int | None,
+    def __init__(self, change: int, remote: str, patchset: int | None,
                  claude_print: bool, claude_model: str | None, claude_permission_mode: str | None,
                  extra_prompt: str | None, md: bool):
         super().__init__(change, remote, patchset, claude_print, claude_model, claude_permission_mode,
@@ -49,7 +49,7 @@ If the change looks good, just say so briefly.
 
 
 # Runs the `review` command.
-def _run(change: str, remote: str, patchset: int | None,
+def _run(change: int, remote: str, patchset: int | None,
          claude_print: bool, claude_model: str | None, claude_permission_mode: str | None,
          extra_prompt: str | None, md: bool):
     _Cmd(change, remote, patchset, claude_print, claude_model, claude_permission_mode,

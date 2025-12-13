@@ -13,9 +13,8 @@ import clerrit.review
 _app = typer.Typer()
 
 # Common argument/option types
-_ChangeArg = Annotated[int, typer.Argument(metavar='CHANGE')]
-_PatchsetArg = Annotated[int | None, typer.Argument(metavar='PATCHSET')]
-_RemoteOpt = Annotated[str, typer.Option('--remote', '-r',
+_ChangeArg = Annotated[int, typer.Argument(metavar='CHANGE', help='Gerrit change number')]
+_RemoteOpt = Annotated[str, typer.Option('--remote', '-r', metavar='REMOTE',
                                          help='Use the Gerrit remote REMOTE')]
 _ClaudePrintOpt = Annotated[bool,
                             typer.Option('--print', '-p',
@@ -27,21 +26,37 @@ _ClaudePermissionModeOpt = Annotated[str | None,
                                      typer.Option('--permission-mode', metavar='MODE',
                                                   help='Permission mode (`claude --permission-mode=MODE`)')]
 _ExtraPromptOpt = Annotated[str | None,
-                            typer.Option('--extra-prompt', '-e',
+                            typer.Option('--extra-prompt', '-e', metavar='PROMPT',
                                          help='Extra prompt to append')]
 
 
+def _validate_fix_patchset(patchset: str | None):
+    if patchset is None or patchset == 'all':
+        return
+
+    try:
+        int(patchset)
+    except ValueError:
+        raise typer.BadParameter('expecting an integer or `all`')
+
+
 @_app.command(name='fix')
-def _fix(change: _ChangeArg, patchset: _PatchsetArg = None, remote: _RemoteOpt = 'review',
+def _fix(change: _ChangeArg,
+         patchset: Annotated[str | None, typer.Argument(metavar='PATCHSET',
+                                                        help='Gerrit patchset number or `all`')] = None,
+         remote: _RemoteOpt = 'review',
          claude_print: _ClaudePrintOpt = False, claude_model: _ClaudeModelOpt = None,
          claude_permission_mode: _ClaudePermissionModeOpt = None,
          extra_prompt: _ExtraPromptOpt = None):
+    _validate_fix_patchset(patchset)
     clerrit.fix._run(change, remote, patchset, claude_print, claude_model, claude_permission_mode,
                      extra_prompt)
 
 
 @_app.command(name='review')
-def _review(change: _ChangeArg, patchset: _PatchsetArg = None,
+def _review(change: _ChangeArg,
+            patchset: Annotated[int | None, typer.Argument(metavar='PATCHSET',
+                                                           help='Gerrit patchset number')] = None,
             remote: _RemoteOpt = 'review', claude_print: _ClaudePrintOpt = False,
             claude_model: _ClaudeModelOpt = None,
             claude_permission_mode: _ClaudePermissionModeOpt = None,

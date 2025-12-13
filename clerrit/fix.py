@@ -11,6 +11,13 @@ import clerrit.common
 
 
 @dataclasses.dataclass(frozen=True)
+class _GerritComment:
+    reviewer: str
+    ps_number: int
+    message: str
+
+
+@dataclasses.dataclass(frozen=True)
 class _SshInfo:
     user: str | None
     host: str
@@ -25,7 +32,7 @@ class _SshInfo:
 
 
 class _Cmd(clerrit.common._Cmd):
-    def __init__(self, change: str, remote: str, patchset: int | None,
+    def __init__(self, change: int, remote: str, patchset: str | None,
                  claude_print: bool, claude_model: str | None, claude_permission_mode: str | None,
                  extra_prompt: str | None):
         super().__init__(change, remote, patchset, claude_print, claude_model, claude_permission_mode,
@@ -41,7 +48,6 @@ class _Cmd(clerrit.common._Cmd):
         self._info('Starting fix')
         self._run_claude()
         self._info('Done')
-
 
     @property
     def _gerrit_ssh_info(self) -> _SshInfo:
@@ -64,7 +70,10 @@ class _Cmd(clerrit.common._Cmd):
         raise clerrit.common._AppError(f'Cannot parse SSH URL `{url}` from remote `{self._remote}`')
 
     @property
-    def _target_patchset(self) -> int:
+    def _target_patchset(self) -> int | str:
+        if self._patchset == 'all':
+            return 'all'
+
         if self._patchset is not None:
             return self._patchset
 
@@ -117,12 +126,19 @@ class _Cmd(clerrit.common._Cmd):
         branch = change_data.get('branch', 'Unknown')
         owner = change_data.get('owner', {}).get('name', 'Unknown')
 
-        # Get comments from target patchset
-        filtered_comments = []
+        # Get comments from target patchset(s)
+        patchset_comments: list[tuple[int, list]] = []
 
         for ps in change_data.get('patchSets', []):
-            if ps.get('number') == self._target_patchset:
-                filtered_comments = ps.get('comments', [])
+            ps_number = ps.get('number')
+            comments = ps.get('comments', [])
+
+            if self._target_patchset == 'all':
+                if comments:
+                    patchset_comments.append((ps_number, comments))
+            elif ps_number == self._target_patchset:
+                if comments:
+                    patchset_comments.append((ps_number, comments))
                 break
 
         # Build Markdown
@@ -140,23 +156,46 @@ class _Cmd(clerrit.common._Cmd):
             '',
         ]
 
-        if not filtered_comments:
-            raise clerrit.common._AppError(f'No review comments for patchset {self._patchset} of change {self._change_number}')
+        if not patchset_comments:
+            patchset_msg = 'any patchset' if self._target_patchset == 'all' else f'patchset {self._target_patchset}'
 
-        for comment in filtered_comments:
-            file_path = comment.get('file', 'Unknown')
-            line_num = comment.get('line', '?')
-            message = comment.get('message', '').strip()
+            raise clerrit.common._AppError(f'No review comments for {patchset_msg} of change {self._change_number}')
 
-            # Skip trivial responses
-            if re.fullmatch(r'(?:|ok|okay|done|ack(?:nowledged)?)\.?', message.lower()):
-                continue
+        # Group comments by location (file path and line number)
+        comments_by_location: dict[str, list[_GerritComment]] = {}
 
-            if message:
+        for ps_number, comments in patchset_comments:
+            for comment in comments:
+                file_path = comment.get('file', 'Unknown file path')
+                line_num = comment.get('line', 'Unknown line number')
+                reviewer = comment.get('reviewer', {}).get('name', 'Unknown reviewer')
+                message = comment.get('message', '').strip()
+
+                # Skip trivial responses
+                if re.fullmatch(r'(?:|ok|okay|done|ack(?:nowledged)?)\.?', message.lower()):
+                    continue
+
+                if message:
+                    if file_path == '/PATCHSET_LEVEL' and line_num == 0:
+                        location = 'General'
+                    else:
+                        location = f'{file_path}:{line_num}'
+
+                    if location not in comments_by_location:
+                        comments_by_location[location] = []
+
+                    comments_by_location[location].append(_GerritComment(reviewer,
+                                                                         ps_number,
+                                                                         message))
+
+        for location, location_comments in comments_by_location.items():
+            lines += [f'## {location}', '']
+
+            for comment in location_comments:
                 lines += [
-                    f'## {file_path}:{line_num}',
+                    f'### Comment by {comment.reviewer} (patchset {comment.ps_number})',
                     '',
-                    message,
+                    comment.message,
                     '',
                 ]
 
@@ -176,7 +215,7 @@ Rules:
 
 
 # Runs the `fix` command.
-def _run(change: str, remote: str, patchset: int | None,
+def _run(change: int, remote: str, patchset: str | None,
          claude_print: bool, claude_model: str | None, claude_permission_mode: str | None,
          extra_prompt: str | None):
     _Cmd(change, remote, patchset, claude_print, claude_model, claude_permission_mode,

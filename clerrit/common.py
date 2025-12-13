@@ -22,23 +22,38 @@ def _print_error(msg: str):
 
 
 class _Cmd(abc.ABC):
-    def __init__(self, change_number: int, remote: str, patchset: int | None,
+    def __init__(self, change_number: int, remote: str, patchset: int | str | None,
                  claude_print: bool, claude_model: str | None, claude_permission_mode: str | None,
                  extra_prompt: str | None):
         self._console = rich.console.Console(highlighter=None)
         self._info('Initializing...')
         self._change_number = change_number
         self._remote = remote
-        self._patchset = patchset
+        self._patchset: int | str | None = self._parse_patchset(patchset)
         self._claude_print = claude_print
         self._claude_model = claude_model
         self._claude_permission_mode = claude_permission_mode
         self._extra_prompt = extra_prompt
 
-        if patchset is None:
+        if self._patchset is None:
             self._patchset = self._latest_patchset
 
-        self._info(f'Remote [bold]{self._remote}[/bold], change [bold]{self._change_number}[/bold], and patchset [bold]{self._patchset}[/bold]')
+        patchset_display = 'all patchsets' if self._patchset == 'all' else f'patchset [bold]{self._patchset}[/bold]'
+
+        self._info(f'Remote [bold]{self._remote}[/bold], change [bold]{self._change_number}[/bold], and {patchset_display}')
+
+    @staticmethod
+    def _parse_patchset(patchset: int | str | None) -> int | str | None:
+        if patchset is None or isinstance(patchset, int):
+            return patchset
+
+        if patchset == 'all':
+            return 'all'
+
+        try:
+            return int(patchset)
+        except ValueError:
+            raise _AppError("Patchset must be an integer or 'all'")
 
     def _info(self, msg: str):
         self._console.print(f'[bold cyan]●[/bold cyan] {msg}')
@@ -118,10 +133,12 @@ class _Cmd(abc.ABC):
         #
         # where `XX` is the last two digits of the change number.
         last_two = f'{self._change_number % 100:02d}'
-        patchset = self._patchset
 
-        if patchset is None:
+        # For `all` or `None`, fetch latest patchset
+        if self._patchset is None or self._patchset == 'all':
             patchset = self._latest_patchset
+        else:
+            patchset = self._patchset
 
         ref = f'refs/changes/{last_two}/{self._change_number}/{patchset}'
         self._exec(['git', 'fetch', self._remote, ref], check=True)
