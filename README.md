@@ -24,6 +24,18 @@ The current features are, for a given change and patchset:
   Claude Code fixes the code locally without running `git add`,
   `git commit`, or such. It doesn't send anything to Gerrit.
 
+  Your typical workflow after having reviewed the changes would be
+  something like:
+
+  ```
+  $ git add -u
+  $ git commit --amend --no-edit
+  $ git review
+  ```
+
+  You could also use `git stash push`/`git stash pop`, cherrypick,
+  or create a fixup commit and rebase.
+
 clerrit is meant to assist reviewers and developers,
 not to replace them.
 
