@@ -84,7 +84,7 @@ See `clerrit --help` to learn more.
      bugs, security issues, edge cases, style problems, and missing error
      handling.
 
-  4. If a `CONTRIBUTING*` file exists, mentions it as context.
+     If a `CONTRIBUTING*` file exists, mentions it as context.
 
 * `fix` command:
 
