@@ -2,10 +2,8 @@
 
 [![PyPI version](https://img.shields.io/pypi/v/clerrit)](https://pypi.org/project/clerrit/)
 
-Supercharge your [Gerrit Code Review](https://www.gerritcodereview.com/)
-workflow with LLM-powered code reviews and fixes!
-
-__*clerrit*__ is a CLI tool which bridges Gerrit Code Review with
+__*clerrit*__ is a CLI tool which bridges
+[Gerrit Code Review](https://www.gerritcodereview.com/) with
 [Claude Code](https://claude.com/product/claude-code).
 
 The current features are, for a given change and patchset:
