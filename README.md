@@ -12,14 +12,22 @@ The current features are, for a given change and patchset:
 
 * **Review a Gerrit change** using Claude
   Code, identifying bugs, security issues, edge cases, style problems,
-  and missing error handling.
+  and missing error handling:
+
+  ```
+  $ clerrit review 18263
+  ```
 
   This command only shows a code review report in Claude Code, helping
   you write your actual review comments on Gerrit. It doesn't send
   anything to Gerrit.
 
 * **Address Gerrit code review comments** by having Claude Code fix the
-  issues based on reviewer feedback.
+  issues based on reviewer feedback:
+
+  ```
+  $ clerrit fix 2439
+  ```
 
   Claude Code fixes the code locally without running `git add`,
   `git commit`, or such. It doesn't send anything to Gerrit.
