@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2025 Philippe Proulx <eeppeliteloop@gmail.com>
 
+from importlib.metadata import version
 from typing import Annotated
 
 import typer
@@ -11,6 +12,21 @@ import clerrit.review
 
 
 _app = typer.Typer()
+
+
+def _version_callback(value: bool):
+    if value:
+        print(f'clerrit {version("clerrit")}')
+        raise typer.Exit()
+
+
+@_app.callback()
+def _callback(version: Annotated[bool | None,
+                                 typer.Option('--version', '-V',
+                                              callback=_version_callback,
+                                              is_eager=True,
+                                              help='Show version and exit')] = None):
+    pass
 
 # Common argument/option types
 _ChangeArg = Annotated[int, typer.Argument(metavar='CHANGE', help='Gerrit change number')]
