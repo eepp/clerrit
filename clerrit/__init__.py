@@ -47,10 +47,13 @@ def _fix(change: _ChangeArg,
          remote: _RemoteOpt = 'review',
          claude_print: _ClaudePrintOpt = False, claude_model: _ClaudeModelOpt = None,
          claude_permission_mode: _ClaudePermissionModeOpt = None,
-         extra_prompt: _ExtraPromptOpt = None):
+         extra_prompt: _ExtraPromptOpt = None,
+         no_fetch: Annotated[bool,
+                             typer.Option('--no-fetch',
+                                          help="Don't fetch the change; work with current tree")] = False):
     _validate_fix_patchset(patchset)
     clerrit.fix._run(change, remote, patchset, claude_print, claude_model, claude_permission_mode,
-                     extra_prompt)
+                     extra_prompt, no_fetch)
 
 
 @_app.command(name='review')

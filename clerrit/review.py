@@ -16,9 +16,9 @@ class _Cmd(clerrit.common._Cmd):
     def _run(self):
         self._fetch_gerrit_change()
         self._create_clerrit_branch()
-        self._info('Starting review')
+        self._info('Starting review...')
         self._run_claude()
-        self._info('Done')
+        self._info('Done!')
 
     @property
     def _prompt(self) -> str:

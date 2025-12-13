@@ -34,20 +34,25 @@ class _SshInfo:
 class _Cmd(clerrit.common._Cmd):
     def __init__(self, change: int, remote: str, patchset: str | None,
                  claude_print: bool, claude_model: str | None, claude_permission_mode: str | None,
-                 extra_prompt: str | None):
+                 extra_prompt: str | None, no_fetch: bool):
         super().__init__(change, remote, patchset, claude_print, claude_model, claude_permission_mode,
                          extra_prompt)
+        self._no_fetch = no_fetch
         self._run()
 
     def _run(self):
-        self._fetch_gerrit_change()
-        self._create_clerrit_branch()
+        if self._no_fetch:
+            self._warn('Not fetching any Gerrit change and not using a new branch; Claude Code will modify your current tree')
+        else:
+            self._fetch_gerrit_change()
+            self._create_clerrit_branch()
+
         self._info('Downloading Gerrit comments...')
         self._comments_path = self._fetch_gerrit_comments()
-        self._info(f'Created `[bold]{self._comments_path}[/bold]`')
-        self._info('Starting fix')
+        self._info(f'Wrote `[bold]{self._comments_path}[/bold]`')
+        self._info('Starting fix...')
         self._run_claude()
-        self._info('Done')
+        self._info('Done!')
 
     @property
     def _gerrit_ssh_info(self) -> _SshInfo:
@@ -83,6 +88,7 @@ class _Cmd(clerrit.common._Cmd):
     # Markdown file, returning its path.
     def _fetch_gerrit_comments(self) -> pathlib.Path:
         ssh_info = self._gerrit_ssh_info
+        self._info(f'Found Gerrit SSH destination: `[bold]{ssh_info.dst}[/bold]` (port [bold]{ssh_info.port}[/bold])')
 
         # Build SSH command
         ssh_cmd = [
@@ -109,10 +115,13 @@ class _Cmd(clerrit.common._Cmd):
         if change_data is None:
             raise clerrit.common._AppError(f'No change data found for change {self._change_number}')
 
+        self._info('Converting JSON Gerrit data to Markdown...')
         md = self._gerrit_comments_to_md(change_data)
 
         # Write to temporary file
-        with tempfile.NamedTemporaryFile(mode='w', prefix='clerrit-', suffix='.md',
+        with tempfile.NamedTemporaryFile(mode='w',
+                                         prefix=f'clerrit-code-review-{self._change_number}-{self._patchset}-',
+                                         suffix='.md',
                                          delete=False) as f:
             f.write(md)
             return pathlib.Path(f.name)
@@ -217,6 +226,6 @@ Rules:
 # Runs the `fix` command.
 def _run(change: int, remote: str, patchset: str | None,
          claude_print: bool, claude_model: str | None, claude_permission_mode: str | None,
-         extra_prompt: str | None):
+         extra_prompt: str | None, no_fetch: bool):
     _Cmd(change, remote, patchset, claude_print, claude_model, claude_permission_mode,
-         extra_prompt)
+         extra_prompt, no_fetch)

@@ -40,7 +40,7 @@ class _Cmd(abc.ABC):
 
         patchset_display = 'all patchsets' if self._patchset == 'all' else f'patchset [bold]{self._patchset}[/bold]'
 
-        self._info(f'Remote [bold]{self._remote}[/bold], change [bold]{self._change_number}[/bold], and {patchset_display}')
+        self._info(f'Remote [bold]{self._remote}[/bold], change [bold]{self._change_number}[/bold], {patchset_display}')
 
     @staticmethod
     def _parse_patchset(patchset: int | str | None) -> int | str | None:
@@ -58,13 +58,16 @@ class _Cmd(abc.ABC):
     def _info(self, msg: str):
         self._console.print(f'[bold cyan]●[/bold cyan] {msg}')
 
+    def _warn(self, msg: str):
+        self._console.print(f'[yellow][bold]▲ Warning[/bold]: {msg}[/yellow]')
+
     def _exec(self, cmd: list[str], **kwargs) -> subprocess.CompletedProcess[str]:
         display_cmd = [
             (arg if len(arg) <= 64 else f'{arg[:64]}[bold]…[/bold]').replace('\n', ' ')
             for arg in cmd
         ]
 
-        self._console.print(f'  [yellow][bold]‣ Running[/bold]: {shlex.join(display_cmd)}[/yellow]')
+        self._console.print(f'  [magenta][bold]‣ Running[/bold]: {shlex.join(display_cmd)}[/magenta]')
 
         try:
             return subprocess.run(cmd, **kwargs)

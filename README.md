@@ -41,8 +41,8 @@ The current features are, for a given change and patchset:
   $ git review
   ```
 
-  You could also use `git stash push`/`git stash pop`, cherrypick,
-  or create a fixup commit and rebase.
+  You can also use the `--no-fetch` option to avoid creating a new
+  branch for the fix: just work in your current tree as is.
 
 clerrit is meant to assist reviewers and developers,
 not to replace them.
@@ -72,33 +72,6 @@ not to replace them.
 
 See `clerrit --help` to learn more.
 
-## What clerrit does
-
-* `review` command:
-
-  1. Fetches the patchset from the Gerrit remote.
-
-  2. Creates a temporary local branch with the change.
-
-  3. Launches Claude Code with a prompt to analyze the latest commit for
-     bugs, security issues, edge cases, style problems, and missing error
-     handling.
-
-     If a `CONTRIBUTING*` file exists, mentions it as context.
-
-* `fix` command:
-
-  1. Fetches the patchset from the Gerrit remote.
-
-  2. Creates a temporary local branch with the change.
-
-  3. Queries the Gerrit server via SSH to retrieve all review comments
-     for the patchset.
-
-  4. Launches Claude Code with the comments and instructions to fix the
-     reported issues (without staging, committing, or creating new files
-     unless requested).
-
 ## Examples
 
 * Review latest patchset of change 15753:
@@ -125,13 +98,14 @@ See `clerrit --help` to learn more.
   $ clerrit review 15753 --remote=gerrit
   ```
 
-* Review with extra context for Claude:
+* Review with extra context for Claude Code:
 
   ```
   $ clerrit review 15753 --extra-prompt='Focus on memory safety.'
   ```
 
-* Fix latest patchset based on review comments:
+* Fix the latest patchset, addressing the review comments of the
+  last patchset:
 
   ```
   $ clerrit fix 8472
@@ -143,7 +117,20 @@ See `clerrit --help` to learn more.
   $ clerrit fix 8472 2
   ```
 
-* Fix using a specific Claude model:
+* Fix the latest patchset, addressing the review comments of _all_
+  the patchsets, and don't create a new branch:
+
+  ```
+  $ clerrit fix 8472 all --no-fetch
+  ```
+
+* Fix with extra context for Claude Code:
+
+  ```
+  $ clerrit fix 8472 --extra-prompt='Do NOT take into account the comments of Jérémie.'
+  ```
+
+* Fix using a specific Claude Code model:
 
   ```
   $ clerrit fix 8472 --model=sonnet
@@ -152,5 +139,34 @@ See `clerrit --help` to learn more.
 * Fix in YOLO mode:
 
   ```
-  $ clerrit fix 8472 --permission-mode=acceptEdits
+  $ clerrit fix 8472 all --permission-mode=acceptEdits
   ```
+
+## What clerrit does
+
+* `review` command:
+
+  1. Fetches the patchset from the Gerrit remote.
+
+  2. Creates a temporary local branch with the change.
+
+  3. Launches Claude Code with a prompt to analyze the latest commit for
+     bugs, security issues, edge cases, style problems, and missing error
+     handling.
+
+     If a `CONTRIBUTING*` file exists, mentions it as context.
+
+* `fix` command:
+
+  1. Without the `--no-fetch` option:
+
+     1. Fetches the patchset from the Gerrit remote.
+
+     2. Creates a temporary local branch with the change.
+
+  2. Queries the Gerrit server via SSH to retrieve all review comments
+     for the patchset(s).
+
+  3. Launches Claude Code with the comments and instructions to fix the
+     reported issues (without staging, committing, or creating
+     new files, unless requested).
