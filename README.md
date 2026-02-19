@@ -152,7 +152,9 @@ See `clerrit --help` to learn more.
      bugs, security issues, edge cases, style problems, and missing error
      handling.
 
-     If a `CONTRIBUTING*` file exists, mentions it as context.
+     If a `CONTRIBUTING.adoc`, `CONTRIBUTING.md`, or `CONTRIBUTING.rst`
+     file exists and there's no `CLAUDE.md` file, mentions it
+     as context.
 
 * `fix` command:
 

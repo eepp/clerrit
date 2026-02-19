@@ -96,8 +96,12 @@ class _Cmd(abc.ABC):
 
             path = path.parent
 
-    # Finds a `CONTRIBUTING*` file in the Git root directory and returns
-    # its file name if found.
+    # Finds a `CONTRIBUTING.{adoc,md,rst}` file in the Git root
+    # directory and returns its file name if found.
+    #
+    # Returns `None` if a `CLAUDE.md` file exists (Claude Code reads
+    # it automatically and we can assume it includes the same kind
+    # of contents).
     @staticmethod
     def _find_contributing_file() -> pathlib.Path | None:
         git_root = _Cmd._find_git_root()
@@ -105,10 +109,15 @@ class _Cmd(abc.ABC):
         if git_root is None:
             return
 
-        m = list(git_root.glob('CONTRIBUTING*'))
+        for pattern in ['CLAUDE.md', '.claude/CLAUDE.md']:
+            if (git_root / pattern).exists():
+                return
 
-        if m:
-            return m[0]
+        for ext in ['adoc', 'md', 'rst']:
+            p = git_root / f'CONTRIBUTING.{ext}'
+
+            if p.exists():
+                return p
 
     # Returns the latest patchset number from the remote.
     @property
