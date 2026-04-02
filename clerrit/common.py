@@ -21,6 +21,33 @@ def _print_error(msg: str):
     rich.console.Console(highlighter=None).print(f'[red][bold]✗ Error[/bold]: {msg}[/red]')
 
 
+def _info(console: rich.console.Console, msg: str):
+    console.print(f'[bold cyan]●[/bold cyan] {msg}')
+
+
+def _warn(console: rich.console.Console, msg: str):
+    console.print(f'[yellow][bold]▲ Warning[/bold]: {msg}[/yellow]')
+
+
+def _exec(console: rich.console.Console, cmd: list[str], **kwargs) -> subprocess.CompletedProcess[str]:
+    display_cmd = [
+        (arg if len(arg) <= 64 else f'{arg[:64]}[bold]…[/bold]').replace('\n', ' ')
+        for arg in cmd
+    ]
+
+    console.print(f'  [magenta][bold]‣ Running[/bold]: {shlex.join(display_cmd)}[/magenta]')
+
+    try:
+        return subprocess.run(cmd, **kwargs)
+    except subprocess.CalledProcessError as exc:
+        _print_error(f'Command failed with exit code {exc.returncode}: {shlex.join(cmd)}')
+
+        if exc.stderr:
+            _print_error(f'Standard error: {exc.stderr}')
+
+        raise
+
+
 class _Cmd(abc.ABC):
     def __init__(self, change_number: int, remote: str, patchset: int | str | None,
                  claude_print: bool, claude_model: str | None, claude_permission_mode: str | None,
@@ -56,28 +83,13 @@ class _Cmd(abc.ABC):
             raise _AppError("Patchset must be an integer or 'all'")
 
     def _info(self, msg: str):
-        self._console.print(f'[bold cyan]●[/bold cyan] {msg}')
+        _info(self._console, msg)
 
     def _warn(self, msg: str):
-        self._console.print(f'[yellow][bold]▲ Warning[/bold]: {msg}[/yellow]')
+        _warn(self._console, msg)
 
     def _exec(self, cmd: list[str], **kwargs) -> subprocess.CompletedProcess[str]:
-        display_cmd = [
-            (arg if len(arg) <= 64 else f'{arg[:64]}[bold]…[/bold]').replace('\n', ' ')
-            for arg in cmd
-        ]
-
-        self._console.print(f'  [magenta][bold]‣ Running[/bold]: {shlex.join(display_cmd)}[/magenta]')
-
-        try:
-            return subprocess.run(cmd, **kwargs)
-        except subprocess.CalledProcessError as exc:
-            _print_error(f'Command failed with exit code {exc.returncode}: {shlex.join(cmd)}')
-
-            if exc.stderr:
-                _print_error(f'Standard error: {exc.stderr}')
-
-            raise
+        return _exec(self._console, cmd, **kwargs)
 
     # Generates a random suffix for the branch name.
     @staticmethod

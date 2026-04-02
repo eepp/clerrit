@@ -6,6 +6,7 @@ from typing import Annotated
 
 import typer
 
+import clerrit.clean
 import clerrit.common
 import clerrit.fix
 import clerrit.review
@@ -85,6 +86,11 @@ def _review(change: _ChangeArg,
                                        help='Output comments as pure Markdown for Gerrit')] = False):
     clerrit.review._run(change, remote, patchset, claude_print, claude_model, claude_permission_mode,
                         extra_prompt, md)
+
+
+@_app.command(name='clean')
+def _clean():
+    clerrit.clean._run()
 
 
 def _main():

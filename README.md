@@ -42,6 +42,13 @@ The current features are, for a given change and patchset:
   You can also use the `--no-fetch` option to avoid creating a new
   branch for the fix: just work in your current tree as is.
 
+* **Delete all local `clerrit-*` branches** created by the `review` and
+  `fix` commands:
+
+  ```
+  $ clerrit clean
+  ```
+
 clerrit is meant to assist reviewers and developers,
 not to replace them.
 
@@ -140,6 +147,12 @@ See `clerrit --help` to learn more.
   $ clerrit fix 8472 all --permission-mode=acceptEdits
   ```
 
+* Clean up all local `clerrit-*` branches:
+
+  ```
+  $ clerrit clean
+  ```
+
 ## What clerrit does
 
 * `review` command:
@@ -170,3 +183,8 @@ See `clerrit --help` to learn more.
   3. Launches Claude Code with the comments and instructions to fix the
      reported issues (without staging, committing, or creating
      new files, unless requested).
+
+* `clean` command:
+
+  * Finds all local branches matching `clerrit-*` and deletes them,
+    skipping the current branch if applicable.
